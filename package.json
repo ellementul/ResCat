@@ -1,0 +1,19 @@
+{
+  "name": "rescat.js",
+  "version": "0.0.1",
+  "description": "resource catalog",
+  "main": "main.js",
+  "scripts": {
+    "test": "node tests.js"
+  },
+  "keywords": [
+    "resource",
+    "catalog"
+  ],
+  "author": "Ellemental",
+  "license": "ISC",
+  "dependencies": {
+    "asyncommun": "git+https://github.com/ellementul/AsynCommun.git",
+    "typesjs": "git+https://github.com/ellementul/typesjs.git"
+  }
+}
