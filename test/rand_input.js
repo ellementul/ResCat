@@ -11,8 +11,9 @@ function CrGeneratorOfTestValues(){
 	this.type = MessType;
 
 	this.connect = function connect(send){
-		var i = 1;
+		var i = 10;
 		while(i--){
+			console.log("Random input test(" + i + ")... "); 
 			send(MessType.rand());
 		}
 	}

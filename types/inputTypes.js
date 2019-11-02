@@ -15,25 +15,39 @@ const AddType = T.obj({
 
 const AddResource = T.obj({
 	action: "AddRes",
+	type: baseTypes.type,
 	resource: baseTypes.resource,
 	id: baseTypes.uid,
 	source: sourceType
 });
 
-const UpdateResource = T.obj({
-	action: "UpRes",
-	resource: baseTypes.resource,
+const AddResourceArray = T.obj({
+	action: "AddResArr",
+	type: baseTypes.type,
+	resource: T.arr(baseTypes.resource, 64, false),
+	id: T.arr(baseTypes.uid, 64, false),
+	source: sourceType
+});
+
+const FindResource = T.obj({
+	action: "FindRes",
 	uid: baseTypes.uid,
 	source: sourceType
 });
 
 const RemoveResource = T.obj({
-	action: "RemRes",
+	action: "RemoveRes",
 	uid: baseTypes.uid,
 	source: sourceType
 });
 
-var Types = [AddType, AddResource, UpdateResource, RemoveResource];
+const FindFromType = T.obj({
+	action: "FindTypeAllRes",
+	type: baseTypes.type,
+	source: sourceType
+})
+
+var Types = [AddType, AddResource, FindResource, RemoveResource, AddResourceArray, FindFromType];
 Types.switchKey = "action";
 
 module.exports = Types;
