@@ -1,6 +1,6 @@
 {
   "name": "rescat.js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "resource catalog",
   "main": "main.js",
   "scripts": {
@@ -14,7 +14,6 @@
   "license": "ISC",
   "dependencies": {
     "asyncommun": "git+https://github.com/ellementul/AsynCommun.git",
-    "typesjs": "git+https://github.com/ellementul/typesjs.git",
     "uuid": "^3.3.3"
   }
 }
