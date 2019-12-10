@@ -1,16 +1,19 @@
-require("typesjs");
-require('typesjs/str_type');
-const T = Object.types;
+const T = require("typesjs");
 
-const uidType = T.str(/^[\w\d-]*$/, 36);
+const uid = T.String.Def('\\w\\d-', 40);
 
-const typeType = T.str(/^[\w\d]*$/, 50);
+const type = T.Key.Def();
 
-const resourceType =  T.str(/^[\w\d\s+:;.,?!=#\/<>"()-\]}{&]*$/, 1024*1024);
+const resource =  T.String.Def('\\w\\d\\s+:;.,?!=#\\/<>"()-\\]}{&', 1024*1024-1);
 
+const success = T.Bool.Def();
+
+const source = T.Any.Def(T.Key.Def());
 
 module.exports = {
-	uid: uidType,
-	type: typeType,
-	resource: resourceType
+	uid,
+	type,
+	resource,
+	success,
+	source,
 };

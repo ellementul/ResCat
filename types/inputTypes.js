@@ -1,53 +1,37 @@
-require("typesjs");
-const T = Object.types;
+const T = require("typesjs");
 
 const baseTypes = require("./resourceType.js");
 
-const sourceType = T.any(T.str, undefined);
-
 //Types of Messeges
-
-const AddType = T.obj({
+let Types = [{
 	action: "AddType",
 	type: baseTypes.type,
-	source: sourceType
-});
-
-const AddResource = T.obj({
+	source:  baseTypes.source,
+},{
 	action: "AddRes",
 	type: baseTypes.type,
 	resource: baseTypes.resource,
 	id: baseTypes.uid,
-	source: sourceType
-});
-
-const AddResourceArray = T.obj({
+	source: baseTypes.source,
+},{
 	action: "AddResArr",
 	type: baseTypes.type,
-	resource: T.arr(baseTypes.resource, 64, false),
-	id: T.arr(baseTypes.uid, 64, false),
-	source: sourceType
-});
-
-const FindResource = T.obj({
+	resource: T.Array.Def(baseTypes.resource, 64, false),
+	id: T.Array.Def(baseTypes.uid, 64, false),
+	source: baseTypes.source,
+},{
 	action: "FindRes",
 	uid: baseTypes.uid,
-	source: sourceType
-});
-
-const RemoveResource = T.obj({
+	source: baseTypes.source,
+},{
 	action: "RemoveRes",
 	uid: baseTypes.uid,
-	source: sourceType
-});
-
-const FindFromType = T.obj({
+	source: baseTypes.source,
+},{
 	action: "FindTypeAllRes",
 	type: baseTypes.type,
-	source: sourceType
-})
-
-var Types = [AddType, AddResource, FindResource, RemoveResource, AddResourceArray, FindFromType];
+	source: baseTypes.source,
+}];
 Types.switchKey = "action";
 
 module.exports = Types;

@@ -1,10 +1,8 @@
-require("typesjs");
-require('typesjs/switch_type');
-const T = Object.types;
+const T = require("typesjs");
 
 const inputTypes = require("../types/inputTypes.js");
 
-var MessType = T.swit(inputTypes.switchKey, inputTypes); 
+var MessType = T.Switch.Def(inputTypes.switchKey, inputTypes);
 
 function CrGeneratorOfTestValues(){
 

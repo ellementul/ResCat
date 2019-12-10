@@ -1,64 +1,51 @@
-require("typesjs");
-require('typesjs/switch_type');
-const T = Object.types;
+const T = require("typesjs");
 
 const baseTypes = require("./resourceType.js");
 
-const adrType = T.any(T.str, undefined);
+const adrType = T.Any.Def(T.Key.Def());
 //Types Of Answers
 
-var AddResorce = T.obj({
+let Type = T.Switch.Def("action", [
+{
 	action: "AddedRes",
-	success: T.bool,
+	success: baseTypes.success,
 	uid: baseTypes.uid,
 	type: baseTypes.type,
 	oldId: baseTypes.uid,
 	adr: adrType
-});
-
-var AddResArr = T.obj({
+},{
 	action: "AddedResArr",
-	success: T.bool,
+	success: baseTypes.success,
 	type: baseTypes.type,
-	uid: T.arr(baseTypes.uid, 64, false),
-	oldId: T.arr(baseTypes.uid, 64, false),
+	uid: T.Array.Def(baseTypes.uid, 64, true),
+	oldId: T.Array.Def(baseTypes.uid, 64, true),
 	adr: adrType
-});
-
-var NewType = T.obj({
+},{
 	action: "AddedType",
-	success: T.bool,
+	success: baseTypes.success,
 	type: baseTypes.type,
 	adr: adrType
-});
-
-
-var FindResource = T.obj({
+},{
 	action: "FoundRes",
-	success: T.bool,
+	success: baseTypes.success,
 	uid: baseTypes.uid,
 	type: baseTypes.type,
 	resource: baseTypes.resource,
 	adr: adrType
-});
-
-var FindResourceFromType = T.obj({
+},{
 	action: "FoundResArr",
-	success: T.bool,
-	uid: T.arr(baseTypes.uid, 256, false),
+	success: baseTypes.success,
+	uid: T.Array.Def(baseTypes.uid, 256, true),
 	type: baseTypes.type,
-	resource: T.arr(baseTypes.resource, 256, false),
+	resource: T.Array.Def(baseTypes.resource, 256, true),
 	adr: adrType
-});
-
-var RemoveResource = T.obj({
+},{
 	action: "RemovedRes",
-	success: T.bool,
+	success: baseTypes.success,
 	uid: baseTypes.uid,
 	adr: adrType
-});
-
-var Type = T.swit("action", [NewType, AddResorce, AddResArr, FindResource, RemoveResource, FindResourceFromType]);
+}
+]);
 
 module.exports = Type;
 

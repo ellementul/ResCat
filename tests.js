@@ -23,7 +23,7 @@ funcTest(commun);
 
 function ValidError(test, val){
 	if(test(val))
-		throw new Error(JSON.stringify({type: test(val), value: val}, "", 4));
+		throw new Error(JSON.stringify(test(val), "", 4));
 
 	return val;
 }
