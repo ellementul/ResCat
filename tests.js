@@ -1,23 +1,20 @@
 const CrCommun = require("AsynCommun").CrCommunicator;
+const CrRandTest = require("AsyncCommTest").randTest;
 
 const CrCatalog = require("./main.js");
 
-const outputType = require("./types/outputTypes.js");
 
-const inputTest = require("./test/rand_input.js");
+const outputType = require("./types/outputTypes.js");
+const inputType = require("./types/inputTypes.js");
+
 const funcTest = require("./test/func_test.js");
 
-
-const commun = new CrCommun(ValidError.bind(null, inputTest.type.test), ValidError.bind(null, outputType.test));
-
-const catalog = new CrCatalog();
-
-catalog.connect(commun);
+let TestComm = new CrRandTest(inputType.rand, outputType.test);
+new CrCatalog(TestComm);
 
 
-
-inputTest.connect(commun.connect(function(){console.log("...........OK");}));
-
+let commun = new CrCommun(ValidError.bind(null, inputType.test), ValidError.bind(null, outputType.test));
+new CrCatalog(commun);
 funcTest(commun);
 
 

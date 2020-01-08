@@ -2,51 +2,46 @@ const T = require("typesjs");
 
 const baseTypes = require("./resourceType.js");
 
-const adrType = T.Any.Def(T.Key.Def());
 //Types Of Answers
+let switchKey = "action";
 
-let Type = T.Switch.Def("action", [
+let Types = [
 {
 	action: "AddedRes",
 	success: baseTypes.success,
-	uid: baseTypes.uid,
-	type: baseTypes.type,
-	oldId: baseTypes.uid,
-	adr: adrType
+	oldId: baseTypes.id,
+	newId: baseTypes.uid,
+	adr: baseTypes.source
 },{
 	action: "AddedResArr",
 	success: baseTypes.success,
-	type: baseTypes.type,
-	uid: T.Array.Def(baseTypes.uid, 64, true),
-	oldId: T.Array.Def(baseTypes.uid, 64, true),
-	adr: adrType
+	addedIds: T.Array.Def(T.Object.Def({ oldId: baseTypes.id, newId: baseTypes.uid }), 64, true),
+	adr: baseTypes.source
 },{
 	action: "AddedType",
 	success: baseTypes.success,
 	type: baseTypes.type,
-	adr: adrType
+	adr: baseTypes.source
 },{
 	action: "FoundRes",
 	success: baseTypes.success,
-	uid: baseTypes.uid,
-	type: baseTypes.type,
+	id: baseTypes.uid,
 	resource: baseTypes.resource,
-	adr: adrType
+	fullPath: baseTypes.fullPath,
+	adr: baseTypes.source
 },{
 	action: "FoundResArr",
 	success: baseTypes.success,
-	uid: T.Array.Def(baseTypes.uid, 256, true),
-	type: baseTypes.type,
-	resource: T.Array.Def(baseTypes.resource, 256, true),
-	adr: adrType
+	resources: T.Array.Def(T.Object.Def({ id: baseTypes.uid, fullPath: baseTypes.path}), 256, true),
+	adr: baseTypes.source
 },{
 	action: "RemovedRes",
 	success: baseTypes.success,
-	uid: baseTypes.uid,
-	adr: adrType
+	id: baseTypes.id,
+	adr: baseTypes.source
 }
-]);
+];
 
-module.exports = Type;
+module.exports = T.Switch.Def(switchKey, Types);
 
 

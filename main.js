@@ -1,17 +1,15 @@
 const UUID = require("uuid/v5");
-var namespace = require("uuid/v1")();
+let namespace = require("uuid/v1")();
 
-function CrCatalog(){
-	var types = new Set();
-	var resorces = new Map();
+function CrCatalog(commun){
+	let types = new Map();
+	let resources = new Map();
 
+	let send = commun.connect(input);
 
-	var send  = null;
-	this.connect = function connect(commun){
-		send = commun.connect(input);
-	}
 
 	function input(mess){
+		
 		switch(mess.action){
 			case "AddType": send(addType(mess)); break;
 			case "AddRes": send(addResorce(mess)); break;
@@ -19,11 +17,12 @@ function CrCatalog(){
 			case "FindRes": send(findResorce(mess)); break;
 			case "FindTypeAllRes": send(findResFromType(mess)); break;
 			case "RemoveRes": send(removeResorce(mess)); break;
+			default: console.log(mess);
 		}
 	}
 
 	function addType(mess){
-		types.add(mess.type);
+		types.set(mess.type, mess.path);
 
 		return {
 			action: "AddedType",
@@ -35,34 +34,33 @@ function CrCatalog(){
 
 	function addResorce(mess){
 		
-		var is_type = types.has(mess.type);
+		
+		let is_type = mess.resource && types.has(mess.resource.type);
 
 		if(!is_type)
 			return {
 				action: "AddedRes",
 				success: false,
-				uid: "None",
-				type: "None",
-				oldId: "None",
+				oldId: mess.resource ? mess.resource.id : "None",
+				newId: "None",
 				adr: mess.source
 			}
 
-		var uid = UUID(mess.type + mess.id, namespace);
+		let uid = UUID(mess.resource.type + mess.resource.id, namespace);
 		
-		var resource = {
-			uid: uid,
-			type: mess.type,
-			content: mess.resource,
+		let resource = {
+			id: uid,
+			type: mess.resource.type,
+			path: mess.resource.path
 		};
 
-		resorces.set(uid, resource);
+		resources.set(uid, resource);
 
 		return {
 			action: "AddedRes",
 			success: true,
-			uid: resource.uid,
-			type: resource.type,
-			oldId: mess.id,
+			oldId: mess.resource.id,
+			newId: uid,
 			adr: mess.source
 		}
 		
@@ -76,32 +74,32 @@ function CrCatalog(){
 			return {
 				action: "AddedRes",
 				success: false,
-				uid: "None",
-				type: "None",
-				oldId: "None",
-				adr: mess.source
+				addedIds: [],
+				adr: mess.source,
 			}
 
-		var uids = [];
+		let addedIds = [];
 		
-		mess.resource.forEach(function(resource, i){
+		mess.resources.forEach(function(resource, i){
 
-			uids[i] = UUID(mess.type + mess.id[i], namespace);
+			let uid = UUID(resource.type + resource.id, namespace);
 			
-			resorces.set(uids[i], {
-				uid: uids[i],
-				type: mess.type,
-				content: resource,
+			addedIds.push({
+				oldId: resource.id,
+				newId: uid,
+			});
+
+			resources.set(uid, {
+				id: uid,
+				type: resource.type,
+				path: resource.path,
 			});
 
 		});
-
 		return {
 			action: "AddedResArr",
-			success: true,
-			uid: uids,
-			type: mess.type,
-			oldId: mess.id,
+			success: !!addedIds.length,
+			addedIds,
 			adr: mess.source
 		}
 		
@@ -109,75 +107,71 @@ function CrCatalog(){
 
 	function findResorce(mess){
 
-		var is_uid = resorces.has(mess.uid);
+		var is_uid = resources.has(mess.id);
 
 		if(!is_uid)
 			return {
 				action: "FoundRes",
 				success: false,
-				uid: mess.uid,
-				type: "None",
-				resource: "None",
+				id: mess.id,
+				resource: null,
+				fullPath: null,
 				adr: mess.source
 			}
 
-
+		let resource = resources.get(mess.id);
+		let fullPath = types.get(resource.type).concat(resource.path);
 
 		return {
 			action: "FoundRes",
 			success: true,
-			uid: mess.uid,
-			type: resorces.get(mess.uid).type,
-			resource: resorces.get(mess.uid).content,
-			adr: mess.source
+			id: mess.id,
+			resource,
+			fullPath,
+			adr: mess.source,
 		}
 
 	}
 
 	function findResFromType(mess){
 
-		var is_type = types.has(mess.type);
+		let is_type = types.has(mess.type);
 
 		if(!is_type)
 			return {
 				action: "FoundResArr",
 				success: false,
-				uid: [],
-				type: mess.type,
-				resource: [],
+				resources: [],
 				adr: mess.source
 			}
 
-		var foundResources = [];
-		var foundUids = [];
+		let typePath = types.get(mess.type);
+		let foundResources = [];
 
-		resorces.forEach(function(res){
-			if(res.type == mess.type){
-				foundResources.push(res.content);
-				foundUids.push(res.uid);
-			}
+		resources.forEach(({id, type, path}) => {
+			if(type == mess.type)
+				foundResources.push({
+					id,
+					fullPath: typePath.concat(path),
+				});
 		});
 
 		return {
 			action: "FoundResArr",
-			success: true,
-			uid: foundUids,
-			type: mess.type,
-			resource: foundResources,
-			adr: mess.source
+			success: !!foundResources.length,
+			resources: foundResources,
+			adr: mess.source,
 		}
 
 	}
 
 	function removeResorce(mess){
-
 		return {
 			action: "RemovedRes",
-			success: resorces.delete(mess.uid),
-			uid: mess.uid,
+			success: resources.delete(mess.id),
+			id: mess.id,
 			adr: mess.source
 		}
-		
 	}
 }
 

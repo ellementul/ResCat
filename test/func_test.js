@@ -1,133 +1,185 @@
+const assert = require('assert').strict;
+
 function CrTest(comm){
-	var type = "Tile_Exemple";
-	var id = "Rest_Warp";
-	var checkIds = null;
 
-	var resource = "https://vk.com/im?peers=160322515&sel=236708990";
-	var resUid = null;
+	let send = comm.connect(checkAnswer);
 
-	var resArr = ["0", "1", "2", "3"];
 
-	var send = comm.connect(checkAnswer);
+	let type = "Exemple";
+	let basePath = ['.','test'];
 
-	send({
+	let newType = {
 		action: "AddType",
 		type: type,
+		path: basePath,
 		source: "Default"
+	};
+
+	let id = "Rest_Warp";
+	let filePath = ['testFile.txt'];
+
+	let newRes = {
+		id,
+		type,
+		path: filePath,
+	};
+
+	let newResArr = (new Array(5)).fill().map((item, index) => {
+		return {
+			id: "" + index,
+			type,
+			path: filePath.concat("" + index),
+		};
 	});
+
+
+	send(newType);
 
 	function checkAnswer(mess){
 		switch(mess.action){
-			case "AddedType": checkNewType(mess); break;
-			case "AddedRes": checkAddedRes(mess); break;
-			case "FoundRes": checkFindRes(mess); break;
-			case "RemovedRes": checkRemoveRes(mess); break;
-			case "AddedResArr": checkAddedResArr(mess); break;
-			case "FoundResArr":checkFindResFromType(mess); break;
+			case "AddedType": {
+				checkNewType(mess); 
+				send({action: "AddRes", resource: newRes});
+				send({
+					action: "AddResArr",
+					type: type,
+					resources: newResArr,
+					source: "Array"
+				});
+			} break;
+			case "AddedRes": {
+				checkAddedRes(mess);
+				newRes.id = mess.newId; 
+				send({ action: "FindRes", id: newRes.id }); 
+			} break;
+
+			case "AddedResArr": {
+				checkAddedResArr(mess);
+
+				mess.addedIds.forEach((ids, index) =>{
+					newResArr[index].id = ids.newId;
+				})
+
+				send({
+					action: "FindTypeAllRes",
+					type: type,
+					source: "Array"
+				}); 
+			} break;
+
+			case "FoundRes": {
+				checkFindRes(mess);
+				if(mess.success)
+					send({ action: "RemoveRes", id: newRes.id });
+			} break;
+
+			case "RemovedRes": {
+
+				checkRemoveRes(mess);
+				checkFindRes = secondCheckFind;
+				send({action: "FindRes", id: newRes.id }); 
+			}
+			break;
+			
+			case "FoundResArr": {
+				checkFindResFromType(mess); 
+				TestOk();
+			} break;
 		}
 	}
 
 	function checkNewType(mess){
-		if((mess.type != type) || (mess.adr !== "Default") || !mess.success)
-			throw new Error(JSON.stringify(mess, "", 2));
+		let errMsg = JSON.stringify(mess, "", 2);
 
-		//console.log("Add Type ... OK");
+		assert.strictEqual(mess.type, type, errMsg);
+		assert.strictEqual(mess.adr, "Default", errMsg);
+		assert.ok(mess.success, errMsg);
 
-		send({
-			action: "AddRes",
-			type: type,
-			resource: resource,
-			id: id
-		});
+		console.log("Add Type ... OK");
 
 	}
 
 	function checkAddedRes(mess){
-		if((mess.oldId != id) || (mess.adr) || (mess.type != type) || !mess.success)
-			throw new Error(JSON.stringify(mess, "", 2));
 
-		//console.log("Add Resource ... OK");
+		let errMsg = JSON.stringify(mess, "", 2);
+		
+		assert.strictEqual(mess.oldId, id, errMsg);
+		assert.ok(!mess.adr, errMsg);
+		assert.ok(mess.success, errMsg);
 
-		resUid = mess.uid;
-
-		send({
-			action: "FindRes",
-			uid: resUid
-		});
+		console.log("Add Resource ... OK");
 
 	}
 
 	function checkFindRes(mess){
-		if((mess.uid != resUid) || (mess.type != type) || (mess.adr) || (mess.resource != resource) || !mess.success)
-			throw new Error(JSON.stringify(mess, "", 2));
 
-		//console.log("Find Resource ... OK");
+		let errMsg = JSON.stringify(mess, "", 2);
+		
+		assert.deepStrictEqual(mess.resource, newRes, errMsg);
 
-		send({
-			action: "RemoveRes",
-			uid: resUid
-		});
+		assert.ok(!mess.adr, errMsg);
+		assert.ok(mess.success, errMsg);
+
+		console.log("Find Resource ... OK");
 	}
 
 	function checkRemoveRes(mess){
-		if((mess.uid != resUid) || (mess.adr) || !mess.success)
-			throw new Error(JSON.stringify(mess, "", 2));
 
-		checkFindRes = secondCheckFind;
+		let errMsg = JSON.stringify(mess, "", 2);
 
-		send({
-			action: "FindRes",
-			uid: resUid
-		});
+		assert.strictEqual(mess.id, newRes.id, errMsg);
+
+		assert.ok(!mess.adr, errMsg);
+		assert.ok(mess.success, errMsg);
+		
 	}
 
 	function secondCheckFind(mess){
-		if((mess.uid != resUid) || (mess.adr) || mess.success)
-			throw new Error(JSON.stringify(mess, "", 2));
+		let errMsg = JSON.stringify(mess, "", 2);
 
-		//console.log("Remove Resource ... OK");
+		assert.strictEqual(mess.resource, null, errMsg);
+		assert.strictEqual(mess.id, newRes.id, errMsg);
+		assert.strictEqual(mess.fullPath, null, errMsg);
 
-		send({
-			action: "AddResArr",
-			type: type,
-			resource: resArr,
-			id: resArr,
-			source: "Array"
-		});
+		assert.ok(!mess.adr, errMsg);
+		assert.ok(!mess.success, errMsg);
+
+		console.log("Remove Resource ... OK");
 
 	};
 
 	function checkAddedResArr(mess){
-		if((mess.adr != "Array") || !mess.success || (mess.type != type))
-			throw new Error(JSON.stringify(mess, "", 2));
 
-		if(!resArr.every(function(id, i){
-			return mess.oldId[i] == id;
-		})) throw new Error(JSON.stringify(mess, "", 2));
+		let errMsg = JSON.stringify(mess, "", 2);
 
-		checkIds = mess.oldId;
+		assert.strictEqual(mess.adr, "Array", errMsg);
+		assert.strictEqual(mess.addedIds.length, 5, errMsg);
 
-		//console.log("Add Resource Array ... OK");
-
-		send({
-			action: "FindTypeAllRes",
-			type: type,
-			source: "Array"
+		mess.addedIds.forEach(function(ids, index){
+			assert.strictEqual(ids.oldId, ""+index);
 		})
 
+		assert.ok(mess.success, errMsg);
+
+		console.log("Add Resource Array ... OK");
 	}
 
 	function checkFindResFromType(mess){
-		if((mess.adr != "Array") || !mess.success || (mess.type != type))
-			throw new Error(JSON.stringify(mess, "", 2));
 
-		if(!checkIds.every(function(id, i){
-			return mess.resource[i] == id;
-		})) throw new Error(JSON.stringify(mess, "", 2));
+		let errMsg = JSON.stringify(mess, "", 2);
 
-		//console.log("Find Resources From Type ... OK");
+		assert.strictEqual(mess.adr, "Array", errMsg);
 
-		TestOk();
+		newResArr.forEach(({id, path}, index) =>{
+			assert.deepStrictEqual(mess.resources[index], {
+				id,
+				fullPath: basePath.concat(path),
+			}, errMsg);
+		})
+
+		assert.ok(mess.success, errMsg);
+
+		console.log("Find Resources From Type ... OK");
 
 	}
 

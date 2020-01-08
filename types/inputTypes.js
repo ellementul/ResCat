@@ -2,36 +2,35 @@ const T = require("typesjs");
 
 const baseTypes = require("./resourceType.js");
 
+let switchKey = "action";
 //Types of Messeges
 let Types = [{
 	action: "AddType",
 	type: baseTypes.type,
+	path: baseTypes.path,
 	source:  baseTypes.source,
 },{
 	action: "AddRes",
-	type: baseTypes.type,
 	resource: baseTypes.resource,
-	id: baseTypes.uid,
 	source: baseTypes.source,
 },{
 	action: "AddResArr",
 	type: baseTypes.type,
-	resource: T.Array.Def(baseTypes.resource, 64, false),
-	id: T.Array.Def(baseTypes.uid, 64, false),
+	resources: baseTypes.resources,
 	source: baseTypes.source,
 },{
 	action: "FindRes",
-	uid: baseTypes.uid,
+	id: baseTypes.uid,
 	source: baseTypes.source,
 },{
 	action: "RemoveRes",
-	uid: baseTypes.uid,
+	id: baseTypes.uid,
 	source: baseTypes.source,
 },{
 	action: "FindTypeAllRes",
 	type: baseTypes.type,
 	source: baseTypes.source,
 }];
-Types.switchKey = "action";
 
-module.exports = Types;
+
+module.exports = T.Switch.Def(switchKey, Types);
