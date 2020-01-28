@@ -17,6 +17,7 @@ function CrCatalog(commun){
 			case "FindRes": send(findResorce(mess)); break;
 			case "FindTypeAllRes": send(findResFromType(mess)); break;
 			case "RemoveRes": send(removeResorce(mess)); break;
+			case "Connected": break;
 			default: console.log(mess);
 		}
 	}
@@ -174,5 +175,10 @@ function CrCatalog(commun){
 		}
 	}
 }
+
+CrCatalog.types = {
+	input: require("./types/inputTypes.js"),
+	output: require("./types/outputTypes.js")
+};
 
 module.exports = CrCatalog;

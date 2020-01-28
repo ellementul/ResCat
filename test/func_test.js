@@ -33,6 +33,10 @@ function CrTest(comm){
 	});
 
 
+	send({
+		action: "Connected",
+		adress: "TKeyDef",
+	});
 	send(newType);
 
 	function checkAnswer(mess){

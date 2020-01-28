@@ -39,8 +39,7 @@ let Types = [
 	success: baseTypes.success,
 	id: baseTypes.id,
 	adr: baseTypes.source
-}
-];
+}];
 
 module.exports = T.Switch.Def(switchKey, Types);
 

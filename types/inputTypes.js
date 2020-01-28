@@ -30,6 +30,9 @@ let Types = [{
 	action: "FindTypeAllRes",
 	type: baseTypes.type,
 	source: baseTypes.source,
+},{
+	action: "Connected",
+	adress: T.Key.Def(),
 }];
 
 
